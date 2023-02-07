@@ -123,6 +123,20 @@ impl AddressSpaceBase {
         false
     }
 
+    /// Get protection flags of memory region that guest physical address `guest_addr` belongs to.
+    ///
+    /// # Arguments
+    /// * `guest_addr` - the guest physical address to inquire
+    pub fn prot_flags(&self, guest_addr: GuestAddress) -> Result<i32, AddressSpaceError> {
+        for reg in self.regions.iter() {
+            if reg.start_addr() <= guest_addr && reg.start_addr().0 + reg.len() > guest_addr.0 {
+                return Ok(reg.prot_flags());
+            }
+        }
+
+        Err(AddressSpaceError::InvalidRegionType)
+    }
+
     /// Get optional NUMA node id associated with guest physical address `gpa`.
     ///
     /// # Arguments
@@ -218,6 +232,14 @@ impl AddressSpace {
         self.state.load().is_dax_region(guest_addr)
     }
 
+    /// Get protection flags of memory region that guest physical address `guest_addr` belongs to.
+    ///
+    /// # Arguments
+    /// * `guest_addr` - the guest physical address to inquire
+    pub fn prot_flags(&self, guest_addr: GuestAddress) -> Result<i32, AddressSpaceError> {
+        self.state.load().prot_flags(guest_addr)
+    }
+
     /// Get optional NUMA node id associated with guest physical address `gpa`.
     ///
     /// # Arguments
@@ -298,6 +320,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let regions = vec![reg];
@@ -315,6 +338,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -323,6 +347,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -340,6 +365,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -348,6 +374,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -367,6 +394,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         assert_eq!(
@@ -385,6 +413,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -406,6 +435,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -414,6 +444,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -445,6 +476,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -453,6 +485,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -472,6 +505,7 @@ mod tests {
             Some(0),
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -480,6 +514,7 @@ mod tests {
             0x300,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -511,6 +546,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -519,6 +555,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -536,6 +573,7 @@ mod tests {
             0x100,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -555,6 +593,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -576,6 +615,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -584,6 +624,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -613,6 +654,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let regions = vec![reg];
@@ -631,6 +673,7 @@ mod tests {
             None,
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -639,6 +682,7 @@ mod tests {
             0x200,
             None,
             None,
+            0,
             0,
             false,
         ));
@@ -658,6 +702,7 @@ mod tests {
             Some(0),
             None,
             0,
+            0,
             false,
         ));
         let reg2 = Arc::new(AddressSpaceRegion::build(
@@ -666,6 +711,7 @@ mod tests {
             0x300,
             None,
             None,
+            0,
             0,
             false,
         ));
